@@ -11,9 +11,19 @@ Deploy a private, lightning-fast autonomous AI agent running locally on an NVIDI
 
 ---
 
-## One-Click Server Setup
+## Quick Deploy on RunPod
 
-Once you spin up a clean Ubuntu Linux instance or a RunPod container, connect to your terminal and run:
+Deploy the entire pre-configured environment with one click using the RunPod template:
+
+[![Deploy on RunPod](https://img.shields.io/badge/Deploy-RunPod-blueviolet?style=for-the-badge&logo=cloud)](https://console.runpod.io/deploy?template=pqm60pu2rg&ref=043t6w9h)
+
+This template comes with Ollama and all dependencies pre-installed on an NVIDIA GPU. After deploying, just connect to the terminal and run `hermes setup` to configure your Telegram bot.
+
+---
+
+## One-Click Server Setup (Other Platforms)
+
+For any clean Ubuntu Linux instance (EC2, Lightsail, or other cloud providers), connect to your terminal and run:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/subbasanka/hermes-agent/main/setup.sh | bash
