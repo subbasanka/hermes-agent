@@ -74,13 +74,55 @@ hermes setup
 
 ---
 
+## How to Run and Connect
+
+Once your Pod is running and you have completed `hermes setup`, the agent is configured but not yet listening. Start it with:
+
+```bash
+hermes start
+```
+
+You will see logs confirming the Telegram token authenticated and the agent is listening.
+
+### Connect via Your Phone
+
+1. Open Telegram on your mobile device.
+2. Search for the bot username you created with `@BotFather` (e.g., `@my_gemma2_agent_bot`).
+3. Tap on your bot and press **Start**.
+4. Type `Hello!` to test it.
+5. Check the RunPod terminal — you'll see the request logged, Gemma 2 processing on the GPU, and the reply sent back to your phone.
+
+---
+
+## Keeping the Bot Alive 24/7
+
+**The Problem:** If you close the RunPod browser tab, the terminal kills the process and your bot goes offline.
+
+**The Solution:** Run the agent in the background using `nohup`:
+
+```bash
+nohup hermes start > $HOME/hermes_agent.log 2>&1 &
+```
+
+This keeps the bot running even after you close your browser. Your bot stays online as long as the RunPod instance is active.
+
+### View logs anytime:
+
+```bash
+tail -f $HOME/hermes_agent.log
+```
+
+---
+
 ## Managing Your Agent
 
 | Command | Description |
 | --- | --- |
-| `hermes start` | Start the agent |
+| `hermes start` | Start the agent (foreground) |
+| `nohup hermes start > ~/hermes_agent.log 2>&1 &` | Start in background (persistent) |
 | `hermes setup` | Reconfigure settings |
 | `ollama run [model_name]` | Switch to a different model |
+| `tail -f ~/hermes_agent.log` | View live agent logs |
 
 ---
 
