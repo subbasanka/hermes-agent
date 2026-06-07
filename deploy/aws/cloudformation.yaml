@@ -1,0 +1,97 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Autonomous Telegram AI Agent - EC2 GPU Instance with Ollama + Hermes
+
+Parameters:
+  InstanceType:
+    Type: String
+    Default: g4dn.xlarge
+    AllowedValues:
+      - g4dn.xlarge
+      - g4dn.2xlarge
+      - g5.xlarge
+      - g5.2xlarge
+    Description: GPU instance type (g4dn = T4, g5 = A10G)
+
+  KeyPairName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: Existing EC2 key pair for SSH access
+
+  SSHAllowedIP:
+    Type: String
+    Default: 0.0.0.0/0
+    Description: IP range allowed to SSH (recommend restricting to your IP/32)
+
+Resources:
+  AgentSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Hermes Agent - SSH access and outbound for Telegram
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref SSHAllowedIP
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+
+  AgentInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyPairName
+      ImageId: ami-0f9de6e2d2f067fca  # Ubuntu 22.04 LTS (us-east-1, update for your region)
+      SecurityGroupIds:
+        - !GetAtt AgentSecurityGroup.GroupId
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: 50
+            VolumeType: gp3
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash
+          set -e
+
+          # Install NVIDIA drivers
+          apt-get update
+          apt-get install -y linux-headers-$(uname -r) build-essential
+          wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb
+          dpkg -i cuda-keyring_1.1-1_all.deb
+          apt-get update
+          apt-get install -y cuda-drivers
+
+          # Install Ollama
+          curl -fsSL https://ollama.com/install.sh | sh
+
+          # Start Ollama and pull model
+          systemctl enable ollama
+          systemctl start ollama
+          sleep 10
+          ollama pull gemma2
+
+          # Install dependencies
+          apt-get install -y curl git xz-utils coreutils
+
+          # Install Hermes Agent
+          curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
+
+          # Signal setup is ready
+          echo "HERMES_SETUP_READY=true" >> /etc/environment
+
+      Tags:
+        - Key: Name
+          Value: hermes-telegram-agent
+
+Outputs:
+  InstancePublicIP:
+    Description: Public IP of the agent instance
+    Value: !GetAtt AgentInstance.PublicIp
+
+  SSHCommand:
+    Description: SSH command to connect
+    Value: !Sub "ssh -i your-key.pem ubuntu@${AgentInstance.PublicIp}"
+
+  NextStep:
+    Description: After SSH, run this to configure your bot
+    Value: "hermes setup && nohup hermes start > ~/hermes_agent.log 2>&1 &"

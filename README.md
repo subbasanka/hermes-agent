@@ -11,19 +11,19 @@ Deploy a private, lightning-fast autonomous AI agent running locally on an NVIDI
 
 ---
 
-## Quick Deploy on RunPod
+## Deploy — Pick Your Platform
 
-Deploy the entire pre-configured environment with one click using the RunPod template:
-
-[![Deploy on RunPod](https://img.shields.io/badge/Deploy-RunPod-blueviolet?style=for-the-badge&logo=cloud)](https://console.runpod.io/deploy?template=pqm60pu2rg&ref=043t6w9h)
-
-This template comes with Ollama and all dependencies pre-installed on an NVIDIA GPU. After deploying, just connect to the terminal and run `hermes setup` to configure your Telegram bot.
+| Platform | Method | Guide |
+| --- | --- | --- |
+| **RunPod** | One-click template (recommended) | [Deploy on RunPod](deploy/runpod/README.md) |
+| **AWS EC2** | CloudFormation template | [Deploy on AWS](deploy/aws/README.md) |
+| **Other Linux** | Manual script | See [setup.sh usage](#one-click-server-setup-other-platforms) below |
 
 ---
 
 ## One-Click Server Setup (Other Platforms)
 
-For any clean Ubuntu Linux instance (EC2, Lightsail, or other cloud providers), connect to your terminal and run:
+For any clean Ubuntu Linux instance (Lightsail, DigitalOcean, or other cloud providers), connect to your terminal and run:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/subbasanka/hermes-agent/main/setup.sh | bash
@@ -76,7 +76,7 @@ hermes setup
 
 ## How to Run and Connect
 
-Once your Pod is running and you have completed `hermes setup`, the agent is configured but not yet listening. Start it with:
+Once your instance is running and you have completed `hermes setup`, the agent is configured but not yet listening. Start it with:
 
 ```bash
 hermes start
@@ -90,13 +90,13 @@ You will see logs confirming the Telegram token authenticated and the agent is l
 2. Search for the bot username you created with `@BotFather` (e.g., `@my_gemma2_agent_bot`).
 3. Tap on your bot and press **Start**.
 4. Type `Hello!` to test it.
-5. Check the RunPod terminal — you'll see the request logged, Gemma 2 processing on the GPU, and the reply sent back to your phone.
+5. Check your terminal — you'll see the request logged, Gemma 2 processing on the GPU, and the reply sent back to your phone.
 
 ---
 
 ## Keeping the Bot Alive 24/7
 
-**The Problem:** If you close the RunPod browser tab, the terminal kills the process and your bot goes offline.
+**The Problem:** If you close the browser tab or SSH session, the terminal kills the process and your bot goes offline.
 
 **The Solution:** Run the agent in the background using `nohup`:
 
@@ -104,7 +104,7 @@ You will see logs confirming the Telegram token authenticated and the agent is l
 nohup hermes start > $HOME/hermes_agent.log 2>&1 &
 ```
 
-This keeps the bot running even after you close your browser. Your bot stays online as long as the RunPod instance is active.
+This keeps the bot running even after you disconnect. Your bot stays online as long as the instance is active.
 
 ### View logs anytime:
 
@@ -129,7 +129,7 @@ tail -f $HOME/hermes_agent.log
 ## Architecture
 
 ```
-Telegram (Mobile) --> RunPod GPU Instance --> Hermes Agent Framework --> Ollama (Gemma 2 9B)
+Telegram (Mobile) --> GPU Instance --> Hermes Agent Framework --> Ollama (Gemma 2 9B)
 ```
 
 The agent runs entirely on your own infrastructure with no data leaving your server.
